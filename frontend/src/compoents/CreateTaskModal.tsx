@@ -1,8 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import API from "../api/axios";
 
+const PROJECT_ID = "69f4e8f4781baf03a5451e46"; // ✅ your existing project id
+
 export default function CreateTaskModal({ close, refresh }: any) {
-  
+
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -10,46 +12,29 @@ export default function CreateTaskModal({ close, refresh }: any) {
     dueDate: ""
   });
 
-  const [projects, setProjects] = useState<any[]>([]);
-  const [selectedProject, setSelectedProject] = useState("");
+  // const [projects, setProjects] = useState<any[]>([]);
+  // const [selectedProject, setSelectedProject] = useState("");
 
-  useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const res = await API.get("/projects");
-        setProjects(res.data);
-
-        if (res.data.length > 0) {
-          setSelectedProject(res.data[0]._id);
-        }
-      } catch {
-        alert("Error fetching projects");
-      }
-    };
-
-    fetchProjects();
-  }, []);
+  // useEffect(() => {
+  //   fetchProjects();
+  // }, []);
 
   const handleSubmit = async () => {
-    if (!form.title || form.title.trim() === "") {
+    if (!form.title.trim()) {
       alert("Title is required");
-      return;
-    }
-
-    if (!selectedProject) {
-      alert("Please select a project");
       return;
     }
 
     try {
       await API.post("/tasks", {
         ...form,
-        projectId: selectedProject
+        projectId: PROJECT_ID 
       });
 
       refresh();
       close();
-    } catch {
+    } catch (err) {
+      console.log(err);
       alert("Error creating task");
     }
   };
@@ -57,21 +42,10 @@ export default function CreateTaskModal({ close, refresh }: any) {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center">
       <div className="bg-white p-6 rounded-lg w-96 shadow-lg">
-        
+
         <h2 className="text-xl font-bold mb-4">Create Task</h2>
 
-        {/*Project Dropdown */}
-        <select
-          className="w-full p-2 border rounded mb-3"
-          value={selectedProject}
-          onChange={(e) => setSelectedProject(e.target.value)}
-        >
-          {projects.map((p) => (
-            <option key={p._id} value={p._id}>
-              {p.name}
-            </option>
-          ))}
-        </select>
+        {/* Project dropdown removed */}
 
         {/* Title */}
         <input
@@ -101,6 +75,7 @@ export default function CreateTaskModal({ close, refresh }: any) {
         {/* Status */}
         <select
           className="w-full p-2 border rounded mb-4"
+          value={form.status}
           onChange={(e) =>
             setForm({ ...form, status: e.target.value })
           }
